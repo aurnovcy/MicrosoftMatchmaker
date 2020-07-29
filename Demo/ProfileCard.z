@@ -1,0 +1,66 @@
+class ProfileCard : ZilchComponent
+{
+    
+    var LastMousePos : Real3 = Real3();
+    var Selected : Boolean = false;
+    var Returning : Boolean = true;
+    
+    var StartPosition : Real3 = Real3();
+    
+    [Property]
+    var InterpolateVelocitySpeed : Real = 0.7;
+    
+    function Initialize(init : CogInitializer)
+    {
+        this.StartPosition = this.Owner.Transform.Translation;
+        
+        Zero.Connect(this.Space, Events.LogicUpdate, this.OnLogicUpdate);
+        Zero.Connect(this.Owner, Events.LeftMouseDown, this.OnLeftMouseDown);
+        Zero.Connect(this.Space, Events.LeftMouseUp, this.OnLeftMouseUp);
+    }
+
+    function OnLeftMouseUp(event : ViewportMouseEvent)
+    {
+        if(Math.Abs(this.Owner.RigidBody.Velocity.X) < 10)
+        {
+            this.Owner.RigidBody.Velocity = Real3(0);
+            this.Returning = true;
+        }
+        else
+        {
+            this.Returning = false;
+        }
+        this.Selected = false;
+    }
+
+    function OnLeftMouseDown(event : ViewportMouseEvent)
+    {
+        this.Selected = true;
+        this.LastMousePos = this.Space.FindObjectByName("Camera").CameraViewport.ScreenToWorldZPlane(event.Mouse.ScreenPosition, 0);
+    }
+
+    function OnLogicUpdate(event : UpdateEvent)
+    {
+        
+        if(this.Selected)
+        {
+            var mousePos = this.Space.FindObjectByName("Camera").CameraViewport.ScreenToWorldZPlane(Zero.Mouse.ScreenPosition, 0);
+            var mouseVel = (mousePos - this.LastMousePos) * 60;
+            
+            var myVel = this.Owner.RigidBody.Velocity;
+            
+            var targetVel = Math.Lerp(myVel, mouseVel, this.InterpolateVelocitySpeed);
+            
+            targetVel.Y = 0;
+            targetVel.Z = 0;
+            
+            this.Owner.RigidBody.Velocity = targetVel;
+            this.LastMousePos = mousePos;
+        }
+        else if(this.Returning)
+        {
+            this.Owner.Transform.WorldTranslation = Math.Lerp(this.Owner.Transform.Translation, this.StartPosition, 0.2);
+        }
+        
+    }
+}

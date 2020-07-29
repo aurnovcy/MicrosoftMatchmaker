@@ -1,0 +1,46 @@
+class ProfileManager : ZilchComponent
+{
+    
+    var CurrCard : Cog = null;
+    
+    var Cards : Array[Archetype] = Array[Archetype]();
+    
+    var Random : Random = Random();
+    
+    function Initialize(init : CogInitializer)
+    {
+        foreach(var child in this.Owner.Children)
+        {
+            this.Cards.Add(Archetype.Find(child.ArchetypeName));
+        }
+        
+        Zero.Connect(this.Space, Events.LogicUpdate, this.OnLogicUpdate);
+    }
+
+    function OnLogicUpdate(event : UpdateEvent)
+    {
+        
+        if(this.CurrCard == null)
+        {
+            this.CurrCard = this.CreateCard();
+        }
+        
+    }
+    
+    
+    function CreateCard() : Cog
+    {
+        if(this.Cards.Count > 0)
+        {
+            var rand = this.Random.RangeExclusiveMax(0, this.Cards.Count);
+            
+            var card = this.Space.CreateAtPosition(this.Cards[rand], Real3(0, 0, 0));
+            
+            this.Cards.RemoveAt(rand);
+            
+            return card;
+        }
+        
+        return null;
+    }
+}

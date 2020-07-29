@@ -1,0 +1,49 @@
+class FadeIn : ZilchComponent
+{
+    [Property]
+    var TimeUntilOpaque : Real = 1.0;
+    
+    function Initialize(init : CogInitializer)
+    {
+        if(this.Owner.Sprite != null)
+        {
+            var color = this.Owner.Sprite.Color;
+            
+            color.W = 0;
+            
+            this.Owner.Sprite.Color = color;
+        }
+        else if(this.Owner.SpriteText != null)
+        {
+            var color = this.Owner.SpriteText.Color;
+            
+            color.W = 0;
+            
+            this.Owner.SpriteText.Color = color;
+        }
+        
+        Zero.Connect(this.Space, Events.LogicUpdate, this.OnLogicUpdate);
+    }
+
+    function OnLogicUpdate(event : UpdateEvent)
+    {
+        
+        if(this.Owner.Sprite != null)
+        {
+            var color = this.Owner.Sprite.Color;
+            
+            color.W = Math.Clamp(color.W + (event.Dt / this.TimeUntilOpaque), 0, 1.0);
+            
+            this.Owner.Sprite.Color = color;
+        }
+        else if(this.Owner.SpriteText != null)
+        {
+            var color = this.Owner.SpriteText.Color;
+            
+            color.W = Math.Clamp(color.W + (event.Dt / this.TimeUntilOpaque), 0, 1.0);
+            
+            this.Owner.SpriteText.Color = color;
+        }
+        
+    }
+}

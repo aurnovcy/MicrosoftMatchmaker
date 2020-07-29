@@ -1,0 +1,22 @@
+class ChoiceHitbox : ZilchComponent
+{
+    var Particles : Cog = null;
+    
+    function Initialize(init : CogInitializer)
+    {
+        this.Particles = this.Owner.FindChildByName("BasicParticleEffect");
+        
+        Zero.Connect(this.Owner, Events.CollisionStarted, this.OnCollisionStarted);
+    }
+
+    function OnCollisionStarted(event : CollisionEvent)
+    {
+        if(event.OtherObject.Name == "ProfileCard")
+        {
+            event.OtherObject.Destroy();
+            
+            this.Particles.SphericalParticleEmitter.Active = true;
+            this.Particles.SphericalParticleEmitter.ResetCount();
+        }
+    }
+}
